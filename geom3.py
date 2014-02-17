@@ -11,7 +11,7 @@ import networkx as nx
 
 
 def euler_to_quat( yaw, pitch, roll, order='ypr' ) :
-    pass
+    raise NotImplementedError()
 
 def axial_to_quat( v ) :
     theta = np.linalg.norm( v )
