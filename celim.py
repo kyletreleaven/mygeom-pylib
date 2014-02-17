@@ -1,7 +1,11 @@
 
 import numpy as np
-import cvxopt.solvers as solvers
+
+# for LP
 from cvxopt import matrix
+import cvxopt.solvers as solvers
+solvers.options['show_progress'] = False
+
 #from pulp import *
 
 
@@ -20,7 +24,7 @@ def system_omit( A, b, i ) :
 
 
 
-def is_redundant( i, A, b ) :
+def is_redundant( A, b, i ) :
     ai = matrix( A[i,:] )
     bi = b[i]
     #
@@ -31,15 +35,8 @@ def is_redundant( i, A, b ) :
     AA = matrix(AA)
     bb = matrix(bb)
     
-    # for solver
-    c = -ai
-    G = -AA
-    h = -bb
-    
-    print remain
-    print c, G, h
-    soln = solvers.lp( c, G, h )
-    print soln
+    soln = solvers.lp( -ai, AA, bb )        # -ai to maximize
+    #print soln
     
     # check for violation
     if soln['status'] == 'optimal' :
@@ -55,7 +52,7 @@ def find_redundant_constraints( A, b ) :
     nrow = np.shape( A )[0]
     indices = set( xrange(nrow) )
     for i in indices :
-        if is_redundant( i, A, b ) : redundant.add( i )
+        if is_redundant( A, b, i ) : redundant.add( i )
         
     return redundant
 
@@ -84,35 +81,23 @@ if __name__ == '__main__' :
     
     A = np.vstack([ A1, A2 ])
     b = np.hstack([ b1, b2 ])
-    #A = A1
-    #b = b1
-
     
-    g1 = geom3.polytope_topology( A, b )
-    lines1 = geom3.get_skeleton( g1, color='b' )
+    AA, bb = eliminate_redundant_constraints( A, b )
+    g = geom3.polytope_topology( AA, bb )
+    lines = geom3.get_skeleton( g, color='b' )
     
-    leave_out = 2
     
-    A3, b3 = system_omit( A, b, leave_out )
-    g2 = geom3.polytope_topology( A3, b3 )
-    lines2 = geom3.get_skeleton( g2, color='g' )
-    
+    # show to people
     ax = get_axes3d()
     ax.set_xlim3d(-10,10)
     ax.set_ylim3d(-10,10)
     ax.set_zlim3d(-10,10)
 
-    for line in lines1 : ax.add_line( line )
+    for line in lines : ax.add_line( line )
     ax.set_aspect('equal')
     plt.show()
     
     
-    red = is_redundant( leave_out, A, b )
-    
-    
-    
-
-
 
 
 
