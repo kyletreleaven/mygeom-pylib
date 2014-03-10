@@ -1,7 +1,7 @@
 
 from setuptools import setup, find_packages
 
-PACKAGE_NAME = "somepackage"
+PACKAGE_NAME = "spatial"
 
 setup(
 	name = PACKAGE_NAME,
